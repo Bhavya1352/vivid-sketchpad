@@ -50,7 +50,15 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground overflow-hidden">
+    <div className="min-h-screen bg-background text-foreground overflow-hidden relative">
+      {/* Background Image */}
+      <div className="absolute inset-0 z-0">
+        <img 
+          src="/BACKGROUND.jpeg" 
+          alt="Background" 
+          className="w-full h-full object-contain opacity-50 blur-[1px]"
+        />
+      </div>
       <div className="absolute top-4 right-4 z-20">
         <ThemeToggle />
       </div>
@@ -65,7 +73,7 @@ const Index = () => {
               Unleash your creativity with a simple and intuitive drawing
               experience. Start fresh or collaborate with others in real-time.
             </p>
-            <div className="flex justify-center animate-fade-in-up animation-delay-400 gap-8">
+            <div className="hidden md:flex justify-center animate-fade-in-up animation-delay-400 gap-8">
               <div className="relative">
                 <div className="w-80 h-60 bg-white rounded-2xl shadow-2xl border-4 border-purple-200 p-4">
                   <canvas 
