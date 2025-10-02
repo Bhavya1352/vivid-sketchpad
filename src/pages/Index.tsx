@@ -59,14 +59,67 @@ const Index = () => {
         <div className="min-h-screen flex flex-col items-center justify-center text-center p-4">
           <div className="space-y-6">
             <h1 className="text-5xl md:text-7xl font-bold bg-gradient-to-r from-purple-400 via-pink-500 to-red-500 bg-clip-text text-transparent animate-fade-in-down">
-              Welcome to Vivid Sketchpad
+              Welcome to Mini Paint
             </h1>
             <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto animate-fade-in-up">
               Unleash your creativity with a simple and intuitive drawing
               experience. Start fresh or collaborate with others in real-time.
             </p>
-            <div className="flex justify-center animate-fade-in-up animation-delay-400">
-              <HeroCanvas />
+            <div className="flex justify-center animate-fade-in-up animation-delay-400 gap-8">
+              <div className="relative">
+                <div className="w-80 h-60 bg-white rounded-2xl shadow-2xl border-4 border-purple-200 p-4">
+                  <canvas 
+                    id="miniCanvas" 
+                    width="288" 
+                    height="192" 
+                    className="w-full h-full rounded-lg cursor-crosshair"
+                    onMouseDown={(e) => {
+                      const canvas = e.currentTarget;
+                      const ctx = canvas.getContext('2d');
+                      if (ctx) {
+                        const rect = canvas.getBoundingClientRect();
+                        const x = e.clientX - rect.left;
+                        const y = e.clientY - rect.top;
+                        ctx.strokeStyle = '#9b87f5';
+                        ctx.lineWidth = 3;
+                        ctx.lineCap = 'round';
+                        ctx.beginPath();
+                        ctx.moveTo(x, y);
+                        
+                        const draw = (e: MouseEvent) => {
+                          const x = e.clientX - rect.left;
+                          const y = e.clientY - rect.top;
+                          ctx.lineTo(x, y);
+                          ctx.stroke();
+                        };
+                        
+                        const stopDraw = () => {
+                          canvas.removeEventListener('mousemove', draw);
+                          canvas.removeEventListener('mouseup', stopDraw);
+                        };
+                        
+                        canvas.addEventListener('mousemove', draw);
+                        canvas.addEventListener('mouseup', stopDraw);
+                      }
+                    }}
+                  />
+                </div>
+                <div className="absolute -bottom-2 -right-2 bg-purple-500 text-white px-3 py-1 rounded-full text-sm font-medium">
+                  Try Drawing!
+                </div>
+              </div>
+              
+              <div className="relative w-80 h-60 rounded-2xl overflow-hidden shadow-2xl border-4 border-pink-200">
+                <img 
+                  src="/200w.gif" 
+                  alt="Drawing Animation" 
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-pink-900/20 to-transparent"></div>
+                <div className="absolute -bottom-2 -left-2 bg-pink-500 text-white px-3 py-1 rounded-full text-sm font-medium">
+                  See Demo!
+                </div>
+              </div>
             </div>
             <div className="pt-4 animate-fade-in-up animation-delay-600">
               <Button
@@ -84,9 +137,9 @@ const Index = () => {
         <div className="py-20 px-4">
           <h2 className="text-4xl font-bold text-center mb-12">Features</h2>
           <div className="max-w-5xl mx-auto grid md:grid-cols-3 gap-8">
-            <FeatureCard icon={<Palette size={48} className="text-primary" />} title="Rich Colors" description="Choose from a wide variety of colors to bring your ideas to life." />
-            <FeatureCard icon={<Users size={48} className="text-primary" />} title="Collaboration" description="Work together with your team in real-time on the same canvas." />
-            <FeatureCard icon={<Zap size={48} className="text-primary" />} title="Real-time" description="See changes instantly as you and your team draw and create." />
+            <FeatureCard icon={<Palette size={48} className="text-primary" />} title="Multiple Tools" description="Draw with pencil, spray brush, add shapes and more creative tools." />
+            <FeatureCard icon={<Users size={48} className="text-primary" />} title="Undo/Redo" description="Never lose your work with powerful undo and redo functionality." />
+            <FeatureCard icon={<Zap size={48} className="text-primary" />} title="Export" description="Save your masterpiece as PNG and share with the world." />
           </div>
         </div>
       </div>

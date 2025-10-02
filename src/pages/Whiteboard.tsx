@@ -2,9 +2,9 @@ import { Canvas } from "@/components/Canvas";
 
 const Whiteboard = () => {
   return (
-    <main>
+    <div className="min-h-screen bg-background">
       <Canvas />
-    </main>
+    </div>
   );
 };
 

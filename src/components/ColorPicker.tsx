@@ -1,5 +1,6 @@
-import { Check } from "lucide-react";
+import { Check, Palette } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useRef } from "react";
 
 interface ColorPickerProps {
   color: string;
@@ -15,6 +16,8 @@ export const ColorPicker = ({ color, onChange }: ColorPickerProps) => {
     { name: "Amber", value: "#fbbf24" },
     { name: "Black", value: "#1a1a1a" },
   ];
+
+  const inputRef = useRef<HTMLInputElement>(null);
 
   return (
     <div className="glass-card rounded-2xl p-3 flex items-center gap-2 animate-scale-in">
@@ -37,6 +40,22 @@ export const ColorPicker = ({ color, onChange }: ColorPickerProps) => {
             )}
           </button>
         ))}
+        <div className="relative">
+          <button 
+            onClick={() => inputRef.current?.click()}
+            className="w-8 h-8 rounded-lg bg-card border-2 border-dashed border-border flex items-center justify-center transition-smooth hover:scale-110"
+            title="Custom Color"
+          >
+            <Palette className="w-4 h-4 text-muted-foreground" />
+          </button>
+          <input 
+            ref={inputRef}
+            type="color" 
+            value={color}
+            onChange={(e) => onChange(e.target.value)}
+            className="absolute top-0 left-0 w-0 h-0 opacity-0"
+          />
+        </div>
       </div>
     </div>
   );
