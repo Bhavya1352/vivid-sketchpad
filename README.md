@@ -46,15 +46,7 @@ A feature-rich, responsive drawing application built with React, TypeScript, and
 
 ## 🚀 Live Demo
 
-[**Try Mini Paint Live**](https://your-demo-link.com) *(Replace with your deployed URL)*
-
-## 📸 Screenshots
-
-### Desktop Interface
-![Desktop View](public/screenshot-desktop.png)
-
-### Mobile Experience
-![Mobile View](public/screenshot-mobile.png)
+[**Try Mini Paint Live**](https://vivid-sketchpad.vercel.app/) *(Replace with your deployed URL)*
 
 ## 🛠️ Tech Stack
 
@@ -86,7 +78,7 @@ npm install
 npm run dev
 ```
 
-Open [http://localhost:5173](http://localhost:5173) to view the application.
+
 
 ### Build for Production
 
