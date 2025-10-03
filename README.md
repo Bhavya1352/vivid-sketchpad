@@ -45,8 +45,7 @@ A feature-rich, responsive drawing application built with React, TypeScript, and
 - **Improvement Tips** - Personalized suggestions for skill development
 
 ## 🚀 Live Demo
-
-[**Try Mini Paint Live**](https://vivid-sketchpad.vercel.app/) *(Replace with your deployed URL)*
+https://vivid-sketchpad.vercel.app/
 
 ## 🛠️ Tech Stack
 
