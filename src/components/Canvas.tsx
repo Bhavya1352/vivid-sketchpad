@@ -5,6 +5,8 @@ import { ColorPicker } from "./ColorPicker";
 import { DrawingSubmitter } from "./DrawingSubmitter";
 import { ZoomControls } from "./ZoomControls";
 import { DarkModeToggle } from "./DarkModeToggle";
+import { KeyboardShortcuts } from "./KeyboardShortcuts";
+import { LoadingSpinner } from "./LoadingSpinner";
 import { toast } from "sonner";
 
 export type BrushType = "pencil" | "spray";
@@ -17,6 +19,7 @@ export const Canvas = () => {
   const [brushWidth, setBrushWidth] = useState(3);
   const [brushType, setBrushType] = useState<BrushType>("pencil");
   const [activeTool, setActiveTool] = useState<"select" | "draw" | "rectangle" | "circle" | "triangle" | "star" | "heart" | "hexagon" | "line" | "text" | "eraser" | "fill" | "oval" | "diamond" | "pentagon" | "octagon" | "arrow" | "smiley" | "eye">("draw");
+  const [isLoading, setIsLoading] = useState(true);
 
   const historyRef = useRef<string[]>([]);
   const historyIndexRef = useRef(-1);
@@ -57,6 +60,9 @@ export const Canvas = () => {
     const initialState = JSON.stringify(canvas.toJSON());
     historyRef.current = [initialState];
     historyIndexRef.current = 0;
+    
+    // Set loading to false after canvas is ready
+    setTimeout(() => setIsLoading(false), 500);
 
     // Event handlers
     const handlePathCreated = () => {
@@ -147,7 +153,19 @@ export const Canvas = () => {
       const brush = brushType === "spray" ? new SprayBrush(fabricCanvas) : new PencilBrush(fabricCanvas);
       brush.color = activeColor;
       brush.width = brushWidth;
+      
+      // Smooth drawing with requestAnimationFrame
+      let animationId: number;
+      const smoothRender = () => {
+        fabricCanvas.renderAll();
+        animationId = requestAnimationFrame(smoothRender);
+      };
+      
       fabricCanvas.freeDrawingBrush = brush;
+      fabricCanvas.on('path:created', () => {
+        cancelAnimationFrame(animationId);
+      });
+      
     } else if (activeTool === "eraser") {
       fabricCanvas.isDrawingMode = true;
       const eraser = new PencilBrush(fabricCanvas);
@@ -561,16 +579,30 @@ export const Canvas = () => {
       <DrawingSubmitter fabricCanvas={fabricCanvas} />
       <ZoomControls fabricCanvas={fabricCanvas} />
       
-      <div className="fixed top-4 right-4 z-50">
+      <div className="fixed top-4 right-4 z-50 flex gap-2">
+        <KeyboardShortcuts />
         <DarkModeToggle />
       </div>
+      
+      {isLoading && (
+        <div className="fixed inset-0 bg-white/80 backdrop-blur-sm flex items-center justify-center z-50">
+          <LoadingSpinner message="Initializing Canvas..." size="lg" />
+        </div>
+      )}
       
       <div className="flex-grow w-full relative" ref={canvasContainerRef}>
         <div className="absolute inset-0 glass-card rounded-3xl overflow-hidden shadow-elegant border-2 border-border/50">
           <canvas ref={canvasRef} />
         </div>
-        <div className="absolute bottom-4 left-4 bg-black/70 text-white px-3 py-1 rounded text-sm">
-          History: {historyRef.current.length} | Index: {historyIndexRef.current + 1}
+        <div className="absolute bottom-4 left-4 bg-black/70 text-white px-3 py-1 rounded text-sm flex items-center gap-2">
+          <div className="flex items-center gap-1">
+            <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+            <span>Live</span>
+          </div>
+          <span>•</span>
+          <span>History: {historyRef.current.length}</span>
+          <span>•</span>
+          <span>Step: {historyIndexRef.current + 1}</span>
         </div>
       </div>
     </div>

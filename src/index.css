@@ -189,4 +189,40 @@ All colors MUST be HSL.
   .animation-delay-600 {
     animation-delay: 600ms;
   }
+
+  @keyframes wiggle {
+    0%, 7% { transform: rotateZ(0); }
+    15% { transform: rotateZ(-15deg); }
+    20% { transform: rotateZ(10deg); }
+    25% { transform: rotateZ(-10deg); }
+    30% { transform: rotateZ(6deg); }
+    35% { transform: rotateZ(-4deg); }
+    40%, 100% { transform: rotateZ(0); }
+  }
+
+  @keyframes tada {
+    0% { transform: scaleX(1); }
+    10%, 20% { transform: scaleX(0.9) rotateZ(-3deg); }
+    30%, 50%, 70%, 90% { transform: scaleX(1.1) rotateZ(3deg); }
+    40%, 60%, 80% { transform: scaleX(1.1) rotateZ(-3deg); }
+    100% { transform: scaleX(1) rotateZ(0); }
+  }
+
+  .animate-wiggle {
+    animation: wiggle 1s ease-in-out infinite;
+  }
+
+  .animate-tada {
+    animation: tada 1s ease-in-out infinite;
+  }
+
+  .animate-shake {
+    animation: shake 0.5s ease-in-out infinite;
+  }
+
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    10%, 30%, 50%, 70%, 90% { transform: translateX(-2px); }
+    20%, 40%, 60%, 80% { transform: translateX(2px); }
+  }
 }
