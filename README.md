@@ -1,73 +1,196 @@
-# Welcome to your Lovable project
+# 🎨 Mini Paint - Professional Digital Drawing Application
 
-## Project info
+A feature-rich, responsive drawing application built with React, TypeScript, and Fabric.js. Create, edit, and export digital artwork with professional-grade tools and an intuitive interface.
 
-**URL**: https://lovable.dev/projects/a041dcb1-736c-40c6-be8a-ffb111724181
+![Mini Paint Demo](https://img.shields.io/badge/Status-Production%20Ready-brightgreen)
+![React](https://img.shields.io/badge/React-18.3.1-blue)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.8.3-blue)
+![Fabric.js](https://img.shields.io/badge/Fabric.js-6.7.1-orange)
 
-## How can I edit this code?
+## ✨ Features
 
-There are several ways of editing your application.
+### 🎯 Core Drawing Tools
+- **Pencil & Eraser** - Smooth drawing with adjustable brush sizes
+- **Spray Brush** - Artistic spray painting effect
+- **Fill Tool** - Click to fill shapes with colors
+- **Text Tool** - Add and edit text with custom fonts
+- **Line Tool** - Draw straight lines with precision
 
-**Use Lovable**
+### 🔷 Shape Library (19+ Shapes)
+- Basic: Rectangle, Circle, Oval, Triangle
+- Advanced: Diamond, Pentagon, Hexagon, Octagon
+- Special: Star, Heart, Arrow, Smiley, Eye
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/a041dcb1-736c-40c6-be8a-ffb111724181) and start prompting.
+### 🎨 Professional Features
+- **Layer System** - Multiple drawing layers with visibility controls
+- **Undo/Redo** - Complete history management with keyboard shortcuts
+- **Zoom & Pan** - Canvas navigation with zoom controls (30%-300%)
+- **Color Picker** - Preset colors + custom RGB color selection
+- **Dark/Light Mode** - Theme toggle with localStorage persistence
 
-Changes made via Lovable will be committed automatically to this repo.
+### 📱 Cross-Platform Support
+- **Responsive Design** - Optimized for desktop and mobile
+- **Touch Support** - Native drawing on mobile devices
+- **Retina Display** - Sharp rendering on high-DPI screens
 
-**Use your preferred IDE**
+### 💾 Project Management
+- **Save/Load Projects** - Complete project persistence
+- **Auto-Save** - Automatic saving every 30 seconds
+- **Export Options** - PNG and SVG format support
+- **Recent Files** - Quick access to previous projects
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+### 🤖 AI Integration
+- **Drawing Evaluation** - AI-powered artwork rating system
+- **Animated Feedback** - Interactive GIF responses based on ratings
+- **Improvement Tips** - Personalized suggestions for skill development
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+## 🚀 Live Demo
 
-Follow these steps:
+[**Try Mini Paint Live**](https://your-demo-link.com) *(Replace with your deployed URL)*
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+## 📸 Screenshots
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+### Desktop Interface
+![Desktop View](public/screenshot-desktop.png)
 
-# Step 3: Install the necessary dependencies.
-npm i
+### Mobile Experience
+![Mobile View](public/screenshot-mobile.png)
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+## 🛠️ Tech Stack
+
+- **Frontend**: React 18.3.1, TypeScript 5.8.3
+- **Canvas Library**: Fabric.js 6.7.1
+- **Styling**: Tailwind CSS, Shadcn/ui
+- **Build Tool**: Vite 5.4.19
+- **State Management**: React Hooks, useReducer
+- **Storage**: localStorage for persistence
+
+## 🏃‍♂️ Quick Start
+
+### Prerequisites
+- Node.js 16+ and npm
+
+### Installation
+
+```bash
+# Clone the repository
+git clone https://github.com/yourusername/mini-paint.git
+
+# Navigate to project directory
+cd mini-paint
+
+# Install dependencies
+npm install
+
+# Start development server
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+Open [http://localhost:5173](http://localhost:5173) to view the application.
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+### Build for Production
 
-**Use GitHub Codespaces**
+```bash
+# Create production build
+npm run build
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+# Preview production build
+npm run preview
+```
 
-## What technologies are used for this project?
+## 🎮 Usage Guide
 
-This project is built with:
+### Basic Drawing
+1. Select **Pencil tool** from toolbar
+2. Choose your **color** from color picker
+3. Adjust **brush size** with slider
+4. Start drawing on canvas
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+### Working with Shapes
+1. Select any **shape tool** (rectangle, circle, etc.)
+2. Click on canvas to add shape
+3. Use **Fill tool** to add colors to shapes
+4. **Select tool** to move and resize objects
 
-## How can I deploy this project?
+### Layer Management
+1. Use **Layer Panel** (right sidebar) to manage layers
+2. **Add new layers** with + button
+3. **Toggle visibility** with eye icon
+4. **Adjust opacity** with slider
+5. **Rename layers** by double-clicking
 
-Simply open [Lovable](https://lovable.dev/projects/a041dcb1-736c-40c6-be8a-ffb111724181) and click on Share -> Publish.
+### Keyboard Shortcuts
+- `Ctrl+Z` - Undo
+- `Ctrl+Y` - Redo  
+- `Ctrl+S` - Save project
+- `Delete` - Remove selected object
 
-## Can I connect a custom domain to my Lovable project?
+## 📁 Project Structure
 
-Yes, you can!
+```
+src/
+├── components/          # React components
+│   ├── Canvas.tsx      # Main canvas component
+│   ├── Toolbar.tsx     # Tool selection interface
+│   ├── LayerPanel.tsx  # Layer management
+│   ├── ColorPicker.tsx # Color selection
+│   └── ui/             # Reusable UI components
+├── hooks/              # Custom React hooks
+│   ├── useLayerManager.ts
+│   └── useProjectManager.ts
+├── types/              # TypeScript interfaces
+│   ├── layerTypes.ts
+│   └── projectTypes.ts
+└── pages/              # Application pages
+    ├── Index.tsx       # Landing page
+    └── Whiteboard.tsx  # Main drawing interface
+```
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+## 🔧 Key Technical Implementations
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+### Canvas Management
+- **Fabric.js Integration** - Advanced canvas manipulation
+- **Event Handling** - Mouse and touch event optimization
+- **Performance** - Efficient rendering with requestAnimationFrame
+
+### State Management
+- **useReducer** - Complex layer state management
+- **Custom Hooks** - Reusable logic abstraction
+- **Refs** - Direct DOM manipulation for performance
+
+### Responsive Design
+- **Mobile-First** - Touch-optimized interface
+- **Breakpoint System** - Tailwind CSS responsive utilities
+- **Cross-Browser** - Tested on major browsers
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit changes (`git commit -m 'Add amazing feature'`)
+4. Push to branch (`git push origin feature/amazing-feature`)
+5. Open Pull Request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 👨‍💻 Author
+
+**Your Name**
+- Portfolio: [your-portfolio.com](https://your-portfolio.com)
+- LinkedIn: [linkedin.com/in/yourprofile](https://linkedin.com/in/yourprofile)
+- Email: your.email@example.com
+
+## 🙏 Acknowledgments
+
+- [Fabric.js](http://fabricjs.com/) - Powerful canvas library
+- [Shadcn/ui](https://ui.shadcn.com/) - Beautiful UI components
+- [Lucide Icons](https://lucide.dev/) - Clean, customizable icons
+- [Tailwind CSS](https://tailwindcss.com/) - Utility-first CSS framework
+
+---
+
+⭐ **Star this repository if you found it helpful!**
+
+*Built with ❤️ for the developer community*
