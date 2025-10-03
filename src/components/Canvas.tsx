@@ -3,6 +3,8 @@ import { Canvas as FabricCanvas, Circle, Rect, PencilBrush, SprayBrush, Polygon,
 import { Toolbar } from "./Toolbar";
 import { ColorPicker } from "./ColorPicker";
 import { DrawingSubmitter } from "./DrawingSubmitter";
+import { ZoomControls } from "./ZoomControls";
+import { DarkModeToggle } from "./DarkModeToggle";
 import { toast } from "sonner";
 
 export type BrushType = "pencil" | "spray";
@@ -39,6 +41,8 @@ export const Canvas = () => {
       backgroundColor: "#ffffff",
       width: container.clientWidth || 800,
       height: container.clientHeight || 600,
+      enableRetinaScaling: true,
+      allowTouchScrolling: false,
     });
 
     const brush = new PencilBrush(canvas);
@@ -112,6 +116,16 @@ export const Canvas = () => {
     canvas.on('object:removed', handleObjectRemoved);
     canvas.on('object:modified', handleObjectModified);
 
+    // Mobile touch support
+    const preventScroll = (e: TouchEvent) => {
+      if (e.target === canvas.upperCanvasEl) {
+        e.preventDefault();
+      }
+    };
+
+    document.addEventListener('touchstart', preventScroll, { passive: false });
+    document.addEventListener('touchmove', preventScroll, { passive: false });
+
     toast.success("Canvas ready!");
 
     return () => {
@@ -119,6 +133,8 @@ export const Canvas = () => {
       canvas.off('object:added', handleObjectAdded);
       canvas.off('object:removed', handleObjectRemoved);
       canvas.off('object:modified', handleObjectModified);
+      document.removeEventListener('touchstart', preventScroll);
+      document.removeEventListener('touchmove', preventScroll);
       canvas.dispose();
     };
   }, []);
@@ -461,14 +477,27 @@ export const Canvas = () => {
     toast.success("🧹 All cleared! Press Ctrl+Z to restore everything");
   };
 
-  const handleExport = () => {
+  const handleExport = (format: 'png' | 'svg' = 'png') => {
     if (!fabricCanvas) return;
-    const dataURL = fabricCanvas.toDataURL({ format: "png" });
-    const link = document.createElement("a");
-    link.href = dataURL;
-    link.download = "mini-paint.png";
-    link.click();
-    toast.success("Image exported!");
+    
+    if (format === 'svg') {
+      const svgData = fabricCanvas.toSVG();
+      const blob = new Blob([svgData], { type: 'image/svg+xml' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'mini-paint.svg';
+      link.click();
+      URL.revokeObjectURL(url);
+      toast.success('SVG exported!');
+    } else {
+      const dataURL = fabricCanvas.toDataURL({ format: 'png' });
+      const link = document.createElement('a');
+      link.href = dataURL;
+      link.download = 'mini-paint.png';
+      link.click();
+      toast.success('PNG exported!');
+    }
   };
 
   const handleEvaluate = () => {
@@ -513,7 +542,8 @@ export const Canvas = () => {
             onBrushWidthChange={setBrushWidth}
             brushType={brushType}
             onBrushTypeChange={setBrushType}
-            onExport={handleExport}
+            onExport={() => handleExport('png')}
+          onExportSVG={() => handleExport('svg')}
             onUndo={handleUndo}
             onRedo={handleRedo}
             onEvaluate={handleEvaluate}
@@ -529,6 +559,11 @@ export const Canvas = () => {
       </div>
       
       <DrawingSubmitter fabricCanvas={fabricCanvas} />
+      <ZoomControls fabricCanvas={fabricCanvas} />
+      
+      <div className="fixed top-4 right-4 z-50">
+        <DarkModeToggle />
+      </div>
       
       <div className="flex-grow w-full relative" ref={canvasContainerRef}>
         <div className="absolute inset-0 glass-card rounded-3xl overflow-hidden shadow-elegant border-2 border-border/50">

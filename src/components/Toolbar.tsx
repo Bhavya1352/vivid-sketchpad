@@ -15,6 +15,7 @@ interface ToolbarProps {
   onToolClick: (tool: "select" | "draw" | "rectangle" | "circle" | "triangle" | "star" | "heart" | "hexagon" | "line" | "text" | "eraser" | "fill" | "oval" | "diamond" | "pentagon" | "octagon" | "arrow" | "smiley" | "eye") => void;
   onClear: () => void;
   onExport: () => void;
+  onExportSVG: () => void;
   onUndo: () => void;
   onRedo: () => void;
   onEvaluate: () => void;
@@ -29,6 +30,7 @@ export const Toolbar = ({
   onToolClick, 
   onClear, 
   onExport,
+  onExportSVG,
   onUndo,
   onRedo,
   onEvaluate,
@@ -94,6 +96,15 @@ export const Toolbar = ({
             onClick={onExport}
             className="tool-button rounded-xl w-10 h-10"
             title="Export as PNG"
+          >
+            <Download className="w-4 h-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onExportSVG}
+            className="tool-button rounded-xl w-10 h-10"
+            title="Export as SVG"
           >
             <Download className="w-4 h-4" />
           </Button>
