@@ -67,10 +67,10 @@ export const Toolbar = ({
             variant="ghost"
             size="icon"
             onClick={onUndo}
-            className="tool-button rounded-xl w-10 h-10 hover:bg-red-100 hover:text-red-600"
-            title="Delete Last Action (Ctrl+Z)"
+            className="tool-button rounded-xl w-10 h-10 hover:bg-blue-100 hover:text-blue-600"
+            title="Undo Last Action (Ctrl+Z)"
           >
-            <Trash2 className="w-4 h-4" />
+            <Undo2 className="w-4 h-4" />
           </Button>
           <Button
             variant="ghost"

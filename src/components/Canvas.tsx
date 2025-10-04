@@ -27,17 +27,14 @@ export const Canvas = () => {
 
   const saveToHistory = () => {
     if (!fabricCanvas || isUndoRedo.current) return;
-    
-    setTimeout(() => {
-      const state = JSON.stringify(fabricCanvas.toJSON());
-      setHistory(prev => {
-        const newHistory = prev.slice(0, historyIndex + 1);
-        newHistory.push(state);
-        return newHistory;
-      });
-      setHistoryIndex(prev => prev + 1);
-      console.log('History saved, new index:', historyIndex + 1);
-    }, 50);
+
+    const state = JSON.stringify(fabricCanvas.toJSON());
+    setHistory(prev => {
+      // If we're not at the end of history, truncate future states
+      const newHistory = prev.slice(0, historyIndex + 1);
+      return [...newHistory, state];
+    });
+    setHistoryIndex(prev => prev + 1);
   };
 
   useEffect(() => {
@@ -59,13 +56,11 @@ export const Canvas = () => {
     canvas.isDrawingMode = true;
 
     setFabricCanvas(canvas);
-    
-    // Don't save empty canvas as initial state
+
+    // Initialize history without saving empty state
     setHistory([]);
     setHistoryIndex(-1);
-    
-    // Set loading to false after canvas is ready
-    setTimeout(() => setIsLoading(false), 500);
+    setIsLoading(false);
 
     // Save on drawing
     canvas.on('path:created', () => {
@@ -135,6 +130,7 @@ export const Canvas = () => {
         if (e.target) {
           e.target.set('fill', activeColor);
           fabricCanvas.renderAll();
+          setTimeout(saveToHistory, 100);
           toast.success(`Object filled with ${activeColor}!`);
         }
       });
@@ -221,6 +217,7 @@ export const Canvas = () => {
         strokeWidth: 2,
       });
       fabricCanvas.add(diamond);
+      setTimeout(saveToHistory, 100);
       toast.info("Diamond added - Click again to add more");
     } else if (tool === "pentagon") {
       const pentagon = new Polygon([
@@ -237,6 +234,7 @@ export const Canvas = () => {
         strokeWidth: 2,
       });
       fabricCanvas.add(pentagon);
+      setTimeout(saveToHistory, 100);
       toast.info("Pentagon added - Click again to add more");
     } else if (tool === "octagon") {
       const octagon = new Polygon([
@@ -256,6 +254,7 @@ export const Canvas = () => {
         strokeWidth: 2,
       });
       fabricCanvas.add(octagon);
+      setTimeout(saveToHistory, 100);
       toast.info("Octagon added - Click again to add more");
     } else if (tool === "star") {
       const star = new Polygon([
@@ -277,6 +276,7 @@ export const Canvas = () => {
         strokeWidth: 2,
       });
       fabricCanvas.add(star);
+      setTimeout(saveToHistory, 100);
       toast.info("Star added - Click again to add more");
     } else if (tool === "heart") {
       const heartPath = "M12,21.35l-1.45-1.32C5.4,15.36,2,12.28,2,8.5 C2,5.42,4.42,3,7.5,3c1.74,0,3.41,0.81,4.5,2.09C13.09,3.81,14.76,3,16.5,3 C19.58,3,22,5.42,22,8.5c0,3.78-3.4,6.86-8.55,11.54L12,21.35z";
@@ -290,6 +290,7 @@ export const Canvas = () => {
         scaleY: 3,
       });
       fabricCanvas.add(heart);
+      setTimeout(saveToHistory, 100);
       toast.info("Heart added - Click again to add more");
     } else if (tool === "hexagon") {
       const hexagon = new Polygon([
@@ -307,6 +308,7 @@ export const Canvas = () => {
         strokeWidth: 2,
       });
       fabricCanvas.add(hexagon);
+      setTimeout(saveToHistory, 100);
       toast.info("Hexagon added - Click again to add more");
     } else if (tool === "arrow") {
       const arrow = new Polygon([
@@ -325,6 +327,7 @@ export const Canvas = () => {
         strokeWidth: 2,
       });
       fabricCanvas.add(arrow);
+      setTimeout(saveToHistory, 100);
       toast.info("Arrow added - Click again to add more");
     } else if (tool === "smiley") {
       const smiley = new IText('😊', {
@@ -354,6 +357,7 @@ export const Canvas = () => {
         strokeWidth: brushWidth,
       });
       fabricCanvas.add(line);
+      setTimeout(saveToHistory, 100);
       toast.info("Line added - Click again to add more");
     } else if (tool === "text") {
       setActiveTool('select');
@@ -367,6 +371,7 @@ export const Canvas = () => {
       fabricCanvas.add(text);
       fabricCanvas.setActiveObject(text);
       text.enterEditing();
+      setTimeout(saveToHistory, 100);
       toast.info("Text mode - Type to edit, click elsewhere when done");
     } else if (tool === "fill") {
       setActiveTool(tool);
@@ -378,7 +383,7 @@ export const Canvas = () => {
     if (historyIndex > 0) {
       const newIndex = historyIndex - 1;
       const state = history[newIndex];
-      
+
       if (fabricCanvas && state) {
         isUndoRedo.current = true;
         fabricCanvas.loadFromJSON(JSON.parse(state), () => {
@@ -386,10 +391,10 @@ export const Canvas = () => {
           isUndoRedo.current = false;
         });
         setHistoryIndex(newIndex);
-        toast.success("🗑️ Deleted!");
+        toast.success("↶ Undid last action!");
       }
     } else {
-      toast.error("Nothing to delete!");
+      toast.error("Nothing to undo!");
     }
   };
 
@@ -397,7 +402,7 @@ export const Canvas = () => {
     if (historyIndex < history.length - 1) {
       const newIndex = historyIndex + 1;
       const state = history[newIndex];
-      
+
       if (fabricCanvas && state) {
         isUndoRedo.current = true;
         fabricCanvas.loadFromJSON(JSON.parse(state), () => {
@@ -427,6 +432,7 @@ export const Canvas = () => {
     fabricCanvas.clear();
     fabricCanvas.backgroundColor = "#ffffff";
     fabricCanvas.renderAll();
+    setTimeout(saveToHistory, 100);
     toast.success("🧹 All cleared! Press Ctrl+Z to restore everything");
   };
 
@@ -444,7 +450,7 @@ export const Canvas = () => {
       URL.revokeObjectURL(url);
       toast.success('SVG exported!');
     } else {
-      const dataURL = fabricCanvas.toDataURL({ format: 'png' });
+      const dataURL = fabricCanvas.toDataURL({ format: 'png', multiplier: 1 });
       const link = document.createElement('a');
       link.href = dataURL;
       link.download = 'mini-paint.png';
@@ -483,14 +489,7 @@ export const Canvas = () => {
           <Toolbar 
             activeTool={activeTool} 
             onToolClick={handleToolClick} 
-            onClear={() => {
-              const activeObject = fabricCanvas?.getActiveObject();
-              if (activeObject) {
-                handleDelete();
-              } else {
-                handleClear();
-              }
-            }} 
+            onClear={handleClear}
             brushWidth={brushWidth}
             onBrushWidthChange={setBrushWidth}
             brushType={brushType}
