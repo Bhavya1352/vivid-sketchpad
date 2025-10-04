@@ -42,9 +42,9 @@ export const DrawingSubmitter = ({ fabricCanvas }: DrawingSubmitterProps) => {
   };
 
   const getRatingGif = (rating: number) => {
-    if (rating <= 3) return '/1-one.gif';           // 1-3: Bad
-    if (rating >= 4 && rating <= 7) return '/celebrating-anniversary.gif';  // 4-7: Average
-    if (rating >= 8) return '/dança-musica.gif';    // 8-10: Best
+    if (rating >= 1 && rating <= 4) return '/1-one.gif';           // 1-4: Show 1/10 gif
+    if (rating >= 5 && rating <= 8) return '/celebrating-anniversary.gif';  // 5-8: Show 5/10 gif  
+    if (rating >= 9 && rating <= 10) return '/dança-musica.gif';    // 9-10: Show 10/10 gif
     return '/1-one.gif'; // Default
   };
 
