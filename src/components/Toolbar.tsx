@@ -67,55 +67,28 @@ export const Toolbar = ({
             variant="ghost"
             size="icon"
             onClick={onUndo}
-            className="tool-button rounded-xl w-10 h-10 hover:bg-blue-100 hover:text-blue-600"
-            title="Restore/Undo (Ctrl+Z)"
+            className="tool-button rounded-xl w-10 h-10 hover:bg-red-100 hover:text-red-600"
+            title="Delete Last Action (Ctrl+Z)"
           >
-            <RotateCcw className="w-4 h-4" />
+            <Trash2 className="w-4 h-4" />
           </Button>
           <Button
             variant="ghost"
             size="icon"
             onClick={onRedo}
             className="tool-button rounded-xl w-10 h-10 hover:bg-green-100 hover:text-green-600"
-            title="Redo (Ctrl+Y)"
+            title="Restore Last Action (Ctrl+Y)"
           >
-            <Redo2 className="w-4 h-4" />
+            <RotateCcw className="w-4 h-4" />
           </Button>
           <Button
             variant="ghost"
             size="icon"
             onClick={onClear}
             className="tool-button rounded-xl w-10 h-10 hover:bg-red-100 hover:text-red-600"
-            title="Delete Selected / Clear All"
+            title="Clear All Drawing"
           >
             <X className="w-4 h-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={onExport}
-            className="tool-button rounded-xl w-10 h-10"
-            title="Export as PNG"
-          >
-            <Download className="w-4 h-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={onExportSVG}
-            className="tool-button rounded-xl w-10 h-10"
-            title="Export as SVG"
-          >
-            <Download className="w-4 h-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={onEvaluate}
-            className="tool-button rounded-xl w-10 h-10 hover:bg-purple-100 hover:text-purple-600"
-            title="AI Evaluate Drawing"
-          >
-            <Sparkles className="w-4 h-4" />
           </Button>
         </div>
       </div>

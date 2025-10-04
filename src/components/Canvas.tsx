@@ -21,19 +21,23 @@ export const Canvas = () => {
   const [activeTool, setActiveTool] = useState<"select" | "draw" | "rectangle" | "circle" | "triangle" | "star" | "heart" | "hexagon" | "line" | "text" | "eraser" | "fill" | "oval" | "diamond" | "pentagon" | "octagon" | "arrow" | "smiley" | "eye">("draw");
   const [isLoading, setIsLoading] = useState(true);
 
-  const historyRef = useRef<string[]>([]);
-  const historyIndexRef = useRef(-1);
+  const [history, setHistory] = useState<string[]>([]);
+  const [historyIndex, setHistoryIndex] = useState(-1);
+  const isUndoRedo = useRef(false);
 
-  const saveState = () => {
-    if (!fabricCanvas) return;
+  const saveToHistory = () => {
+    if (!fabricCanvas || isUndoRedo.current) return;
     
-    const state = JSON.stringify(fabricCanvas.toJSON());
-    const newHistory = historyRef.current.slice(0, historyIndexRef.current + 1);
-    newHistory.push(state);
-    historyRef.current = newHistory;
-    historyIndexRef.current = newHistory.length - 1;
-    
-    console.log('State saved:', historyIndexRef.current, 'Total:', historyRef.current.length);
+    setTimeout(() => {
+      const state = JSON.stringify(fabricCanvas.toJSON());
+      setHistory(prev => {
+        const newHistory = prev.slice(0, historyIndex + 1);
+        newHistory.push(state);
+        return newHistory;
+      });
+      setHistoryIndex(prev => prev + 1);
+      console.log('History saved, new index:', historyIndex + 1);
+    }, 50);
   };
 
   useEffect(() => {
@@ -56,71 +60,23 @@ export const Canvas = () => {
 
     setFabricCanvas(canvas);
     
-    // Initialize history
-    const initialState = JSON.stringify(canvas.toJSON());
-    historyRef.current = [initialState];
-    historyIndexRef.current = 0;
+    // Don't save empty canvas as initial state
+    setHistory([]);
+    setHistoryIndex(-1);
     
     // Set loading to false after canvas is ready
     setTimeout(() => setIsLoading(false), 500);
 
-    // Event handlers
-    const handlePathCreated = () => {
+    // Save on drawing
+    canvas.on('path:created', () => {
       setTimeout(() => {
-        if (canvas) {
+        if (!isUndoRedo.current) {
           const state = JSON.stringify(canvas.toJSON());
-          const newHistory = historyRef.current.slice(0, historyIndexRef.current + 1);
-          newHistory.push(state);
-          historyRef.current = newHistory;
-          historyIndexRef.current = newHistory.length - 1;
-          console.log('Path created - State saved:', historyIndexRef.current);
+          setHistory(prev => [...prev, state]);
+          setHistoryIndex(prev => prev + 1);
         }
       }, 100);
-    };
-
-    const handleObjectAdded = () => {
-      setTimeout(() => {
-        if (canvas) {
-          const state = JSON.stringify(canvas.toJSON());
-          const newHistory = historyRef.current.slice(0, historyIndexRef.current + 1);
-          newHistory.push(state);
-          historyRef.current = newHistory;
-          historyIndexRef.current = newHistory.length - 1;
-          console.log('Object added - State saved:', historyIndexRef.current);
-        }
-      }, 100);
-    };
-
-    const handleObjectRemoved = () => {
-      setTimeout(() => {
-        if (canvas) {
-          const state = JSON.stringify(canvas.toJSON());
-          const newHistory = historyRef.current.slice(0, historyIndexRef.current + 1);
-          newHistory.push(state);
-          historyRef.current = newHistory;
-          historyIndexRef.current = newHistory.length - 1;
-          console.log('Object removed - State saved:', historyIndexRef.current);
-        }
-      }, 100);
-    };
-
-    const handleObjectModified = () => {
-      setTimeout(() => {
-        if (canvas) {
-          const state = JSON.stringify(canvas.toJSON());
-          const newHistory = historyRef.current.slice(0, historyIndexRef.current + 1);
-          newHistory.push(state);
-          historyRef.current = newHistory;
-          historyIndexRef.current = newHistory.length - 1;
-          console.log('Object modified - State saved:', historyIndexRef.current);
-        }
-      }, 100);
-    };
-
-    canvas.on('path:created', handlePathCreated);
-    canvas.on('object:added', handleObjectAdded);
-    canvas.on('object:removed', handleObjectRemoved);
-    canvas.on('object:modified', handleObjectModified);
+    });
 
     // Mobile touch support
     const preventScroll = (e: TouchEvent) => {
@@ -135,10 +91,7 @@ export const Canvas = () => {
     toast.success("Canvas ready!");
 
     return () => {
-      canvas.off('path:created', handlePathCreated);
-      canvas.off('object:added', handleObjectAdded);
-      canvas.off('object:removed', handleObjectRemoved);
-      canvas.off('object:modified', handleObjectModified);
+      canvas.off('path:created');
       document.removeEventListener('touchstart', preventScroll);
       document.removeEventListener('touchmove', preventScroll);
       canvas.dispose();
@@ -147,6 +100,9 @@ export const Canvas = () => {
 
   useEffect(() => {
     if (!fabricCanvas) return;
+
+    // Remove any existing fill handlers
+    fabricCanvas.off('mouse:down');
 
     if (activeTool === "draw") {
       fabricCanvas.isDrawingMode = true;
@@ -172,16 +128,31 @@ export const Canvas = () => {
       eraser.color = "#ffffff";
       eraser.width = brushWidth * 2;
       fabricCanvas.freeDrawingBrush = eraser;
+    } else if (activeTool === "fill") {
+      fabricCanvas.isDrawingMode = false;
+      // Add persistent fill handler
+      fabricCanvas.on('mouse:down', (e) => {
+        if (e.target) {
+          e.target.set('fill', activeColor);
+          fabricCanvas.renderAll();
+          toast.success(`Object filled with ${activeColor}!`);
+        }
+      });
     } else {
       fabricCanvas.isDrawingMode = false;
     }
   }, [fabricCanvas, activeTool, activeColor, brushWidth, brushType]);
 
   const handleToolClick = (tool: typeof activeTool) => {
-    setActiveTool(tool);
-
     if (!fabricCanvas) return;
 
+    // Only set active tool for non-shape tools
+    if (["select", "draw", "eraser", "fill"].includes(tool)) {
+      setActiveTool(tool);
+      return;
+    }
+
+    // For shape tools, add the shape but keep the tool active
     if (tool === "rectangle") {
       const rect = new Rect({
         left: 100,
@@ -193,7 +164,8 @@ export const Canvas = () => {
         height: 80,
       });
       fabricCanvas.add(rect);
-      toast.info("Rectangle added");
+      setTimeout(saveToHistory, 100);
+      toast.info("Rectangle added - Click again to add more");
     } else if (tool === "circle") {
       const circle = new Circle({
         left: 100,
@@ -204,7 +176,8 @@ export const Canvas = () => {
         radius: 50,
       });
       fabricCanvas.add(circle);
-      toast.info("Circle added");
+      setTimeout(saveToHistory, 100);
+      toast.info("Circle added - Click again to add more");
     } else if (tool === "oval") {
       const oval = new Circle({
         left: 100,
@@ -217,7 +190,8 @@ export const Canvas = () => {
         scaleY: 0.8,
       });
       fabricCanvas.add(oval);
-      toast.info("Oval added");
+      setTimeout(saveToHistory, 100);
+      toast.info("Oval added - Click again to add more");
     } else if (tool === "triangle") {
       const triangle = new Polygon([
         { x: 0, y: -50 },
@@ -231,7 +205,8 @@ export const Canvas = () => {
         strokeWidth: 2,
       });
       fabricCanvas.add(triangle);
-      toast.info("Triangle added");
+      setTimeout(saveToHistory, 100);
+      toast.info("Triangle added - Click again to add more");
     } else if (tool === "diamond") {
       const diamond = new Polygon([
         { x: 0, y: -50 },
@@ -246,7 +221,7 @@ export const Canvas = () => {
         strokeWidth: 2,
       });
       fabricCanvas.add(diamond);
-      toast.info("Diamond added");
+      toast.info("Diamond added - Click again to add more");
     } else if (tool === "pentagon") {
       const pentagon = new Polygon([
         { x: 0, y: -50 },
@@ -262,7 +237,7 @@ export const Canvas = () => {
         strokeWidth: 2,
       });
       fabricCanvas.add(pentagon);
-      toast.info("Pentagon added");
+      toast.info("Pentagon added - Click again to add more");
     } else if (tool === "octagon") {
       const octagon = new Polygon([
         { x: 0, y: -50 },
@@ -281,7 +256,7 @@ export const Canvas = () => {
         strokeWidth: 2,
       });
       fabricCanvas.add(octagon);
-      toast.info("Octagon added");
+      toast.info("Octagon added - Click again to add more");
     } else if (tool === "star") {
       const star = new Polygon([
         { x: 0, y: -50 },
@@ -302,7 +277,7 @@ export const Canvas = () => {
         strokeWidth: 2,
       });
       fabricCanvas.add(star);
-      toast.info("Star added");
+      toast.info("Star added - Click again to add more");
     } else if (tool === "heart") {
       const heartPath = "M12,21.35l-1.45-1.32C5.4,15.36,2,12.28,2,8.5 C2,5.42,4.42,3,7.5,3c1.74,0,3.41,0.81,4.5,2.09C13.09,3.81,14.76,3,16.5,3 C19.58,3,22,5.42,22,8.5c0,3.78-3.4,6.86-8.55,11.54L12,21.35z";
       const heart = new Path(heartPath, {
@@ -315,7 +290,7 @@ export const Canvas = () => {
         scaleY: 3,
       });
       fabricCanvas.add(heart);
-      toast.info("Heart added");
+      toast.info("Heart added - Click again to add more");
     } else if (tool === "hexagon") {
       const hexagon = new Polygon([
         { x: 50, y: 0 },
@@ -332,7 +307,7 @@ export const Canvas = () => {
         strokeWidth: 2,
       });
       fabricCanvas.add(hexagon);
-      toast.info("Hexagon added");
+      toast.info("Hexagon added - Click again to add more");
     } else if (tool === "arrow") {
       const arrow = new Polygon([
         { x: -40, y: -10 },
@@ -350,64 +325,27 @@ export const Canvas = () => {
         strokeWidth: 2,
       });
       fabricCanvas.add(arrow);
-      toast.info("Arrow added");
+      toast.info("Arrow added - Click again to add more");
     } else if (tool === "smiley") {
-      const face = new Circle({
-        left: 100,
-        top: 100,
-        fill: 'transparent',
-        stroke: activeColor,
-        strokeWidth: 2,
-        radius: 40,
+      const smiley = new IText('😊', {
+        left: Math.random() * (fabricCanvas.width! - 50),
+        top: Math.random() * (fabricCanvas.height! - 50),
+        fontSize: 40,
+        fontFamily: 'Arial',
       });
-      const leftEye = new Circle({
-        left: 85,
-        top: 90,
-        fill: activeColor,
-        radius: 3,
-      });
-      const rightEye = new Circle({
-        left: 115,
-        top: 90,
-        fill: activeColor,
-        radius: 3,
-      });
-      const smile = new Path('M 80 120 Q 100 135 120 120', {
-        left: 100,
-        top: 100,
-        fill: 'transparent',
-        stroke: activeColor,
-        strokeWidth: 2,
-      });
-      fabricCanvas.add(face);
-      fabricCanvas.add(leftEye);
-      fabricCanvas.add(rightEye);
-      fabricCanvas.add(smile);
-      toast.info("Smiley added");
+      fabricCanvas.add(smiley);
+      setTimeout(saveToHistory, 100);
+      toast.info("Smiley emoji added - Click again to add more");
     } else if (tool === "eye") {
-      const eyeShape = new Polygon([
-        { x: -30, y: 0 },
-        { x: -15, y: -15 },
-        { x: 15, y: -15 },
-        { x: 30, y: 0 },
-        { x: 15, y: 15 },
-        { x: -15, y: 15 }
-      ], {
-        left: 100,
-        top: 100,
-        fill: 'transparent',
-        stroke: activeColor,
-        strokeWidth: 2,
+      const eye = new IText('👁️', {
+        left: Math.random() * (fabricCanvas.width! - 50),
+        top: Math.random() * (fabricCanvas.height! - 50),
+        fontSize: 40,
+        fontFamily: 'Arial',
       });
-      const pupil = new Circle({
-        left: 100,
-        top: 100,
-        fill: activeColor,
-        radius: 8,
-      });
-      fabricCanvas.add(eyeShape);
-      fabricCanvas.add(pupil);
-      toast.info("Eye added");
+      fabricCanvas.add(eye);
+      setTimeout(saveToHistory, 100);
+      toast.info("Eye emoji added - Click again to add more");
     } else if (tool === "line") {
       const line = new Line([50, 50, 150, 50], {
         left: 100,
@@ -416,64 +354,61 @@ export const Canvas = () => {
         strokeWidth: brushWidth,
       });
       fabricCanvas.add(line);
-      toast.info("Line added");
+      toast.info("Line added - Click again to add more");
     } else if (tool === "text") {
+      setActiveTool('select');
       const text = new IText('Type here...', {
-        left: 100,
-        top: 100,
+        left: Math.random() * (fabricCanvas.width! - 100),
+        top: Math.random() * (fabricCanvas.height! - 50),
         fill: activeColor,
         fontSize: 20,
         fontFamily: 'Arial',
       });
       fabricCanvas.add(text);
       fabricCanvas.setActiveObject(text);
-      
-      // Don't auto-enter editing mode
-      toast.info("Text added - Double click to edit");
+      text.enterEditing();
+      toast.info("Text mode - Type to edit, click elsewhere when done");
     } else if (tool === "fill") {
-      toast.info("Click on an object to fill with color");
-      fabricCanvas.on('mouse:down', function fillHandler(e) {
-        if (e.target) {
-          e.target.set('fill', activeColor);
-          fabricCanvas.renderAll();
-          fabricCanvas.off('mouse:down', fillHandler);
-          toast.success(`Object filled with ${activeColor}!`);
-        }
-      });
+      setActiveTool(tool);
+      toast.info("Fill mode active - Click objects to fill with color");
     }
   };
 
   const handleUndo = () => {
-    if (historyIndexRef.current > 0) {
-      historyIndexRef.current--;
-      const state = historyRef.current[historyIndexRef.current];
+    if (historyIndex > 0) {
+      const newIndex = historyIndex - 1;
+      const state = history[newIndex];
       
-      console.log('Undo to index:', historyIndexRef.current);
-      
-      fabricCanvas?.loadFromJSON(JSON.parse(state), () => {
-        fabricCanvas.renderAll();
-      });
-      
-      toast.success("⬅️ Restored!");
+      if (fabricCanvas && state) {
+        isUndoRedo.current = true;
+        fabricCanvas.loadFromJSON(JSON.parse(state), () => {
+          fabricCanvas.renderAll();
+          isUndoRedo.current = false;
+        });
+        setHistoryIndex(newIndex);
+        toast.success("🗑️ Deleted!");
+      }
     } else {
-      toast.error("Nothing to undo!");
+      toast.error("Nothing to delete!");
     }
   };
 
   const handleRedo = () => {
-    if (historyIndexRef.current < historyRef.current.length - 1) {
-      historyIndexRef.current++;
-      const state = historyRef.current[historyIndexRef.current];
+    if (historyIndex < history.length - 1) {
+      const newIndex = historyIndex + 1;
+      const state = history[newIndex];
       
-      console.log('Redo to index:', historyIndexRef.current);
-      
-      fabricCanvas?.loadFromJSON(JSON.parse(state), () => {
-        fabricCanvas.renderAll();
-      });
-      
-      toast.success("➡️ Redo!");
+      if (fabricCanvas && state) {
+        isUndoRedo.current = true;
+        fabricCanvas.loadFromJSON(JSON.parse(state), () => {
+          fabricCanvas.renderAll();
+          isUndoRedo.current = false;
+        });
+        setHistoryIndex(newIndex);
+        toast.success("↩️ Restored!");
+      }
     } else {
-      toast.error("Nothing to redo!");
+      toast.error("Nothing to restore!");
     }
   };
 
@@ -600,9 +535,9 @@ export const Canvas = () => {
             <span>Live</span>
           </div>
           <span>•</span>
-          <span>History: {historyRef.current.length}</span>
+          <span>History: {history.length}</span>
           <span>•</span>
-          <span>Step: {historyIndexRef.current + 1}</span>
+          <span>Step: {historyIndex + 1}</span>
         </div>
       </div>
     </div>
